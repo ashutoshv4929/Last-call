@@ -39,36 +39,23 @@ function useUpload() {
     try {
       setLoading(true);
       let response;
-      if ('reactNativeAsset' in input && input.reactNativeAsset) {
-        if (input.reactNativeAsset.file) {
-          const formData = new FormData();
-          formData.append("file", input.reactNativeAsset.file);
-          response = await fetch("/_create/api/upload/", {
-            method: "POST",
-            body: formData
-          });
-        } else {
-          const response = await fetch("/_create/api/upload/presign/", {
-            method: 'POST',
-          })
-          const { secureSignature, secureExpire } = await response.json();
-          const result = await client.uploadFile(input.reactNativeAsset, {
-            fileName: input.reactNativeAsset.name ?? input.reactNativeAsset.uri.split("/").pop(),
-            contentType: input.reactNativeAsset.mimeType,
-            secureSignature,
-            secureExpire
-          });
-          return { url: `${process.env.EXPO_PUBLIC_BASE_CREATE_USER_CONTENT_URL}/${result.uuid}/`, mimeType: result.mimeType || null };
-        }
-      } else if ("file" in input && input.file) {
+      
+      if ("file" in input && input.file) {
         const formData = new FormData();
         formData.append("file", input.file);
-        response = await fetch("/_create/api/upload/", {
+        response = await fetch("/api/upload", {
+          method: "POST",
+          body: formData
+        });
+      } else if ('reactNativeAsset' in input && input.reactNativeAsset?.file) {
+        const formData = new FormData();
+        formData.append("file", input.reactNativeAsset.file);
+        response = await fetch("/api/upload", {
           method: "POST",
           body: formData
         });
       } else if ("url" in input) {
-        response = await fetch("/_create/api/upload/", {
+        response = await fetch("/api/upload", {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
@@ -76,7 +63,7 @@ function useUpload() {
           body: JSON.stringify({ url: input.url })
         });
       } else if ("base64" in input) {
-        response = await fetch("/_create/api/upload/", {
+        response = await fetch("/api/upload", {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
@@ -84,13 +71,7 @@ function useUpload() {
           body: JSON.stringify({ base64: input.base64 })
         });
       } else {
-        response = await fetch("/_create/api/upload/", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/octet-stream"
-          },
-          body: input.buffer
-        });
+        throw new Error("Unsupported input type");
       }
       if (!response.ok) {
         if (response.status === 413) {
