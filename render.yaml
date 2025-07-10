@@ -2,8 +2,12 @@ services:
   - type: web
     name: last-call
     env: node
-    buildCommand: npm install && npm run build
+    buildCommand: |
+      npm install
+      npm run build
     startCommand: npm start
     envVars:
       - key: NODE_VERSION
         value: 18.x.0
+      - key: NPM_CONFIG_PRODUCTION
+        value: 'false'
