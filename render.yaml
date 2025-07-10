@@ -3,7 +3,7 @@ services:
     name: last-call
     env: node
     buildCommand: |
-      npm install
+      npm ci
       npm run build
     startCommand: npm start
     envVars:
